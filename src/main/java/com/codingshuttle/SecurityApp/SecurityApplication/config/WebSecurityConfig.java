@@ -1,5 +1,8 @@
 package com.codingshuttle.SecurityApp.SecurityApplication.config;
 
+import com.codingshuttle.SecurityApp.SecurityApplication.filters.JwtAuthFilter;
+import com.codingshuttle.SecurityApp.SecurityApplication.services.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,22 +18,27 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
+    private final UserService userService;
+
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+    SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter) throws Exception{
         httpSecurity
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers("/posts","/auth/**").permitAll()
-                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
+//                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated())
                 .csrf(csrfConfig->csrfConfig
                         .disable())
                 .sessionManagement(sessionConfig->sessionConfig
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 //                .formLogin(Customizer.withDefaults());  //add default login form and its features
 
         return httpSecurity.build();
@@ -58,8 +66,4 @@ public class WebSecurityConfig {
 //        return new InMemoryUserDetailsManager(normalUser,adminUser);
 //    }
 
-    @Bean
-    PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
-    }
 }
