@@ -1,6 +1,7 @@
 package com.codingshuttle.SecurityApp.SecurityApplication.config;
 
 import com.codingshuttle.SecurityApp.SecurityApplication.filters.JwtAuthFilter;
+import com.codingshuttle.SecurityApp.SecurityApplication.handlers.OAuth2SuccessHandler;
 import com.codingshuttle.SecurityApp.SecurityApplication.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -26,19 +27,24 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class WebSecurityConfig {
 
     private final UserService userService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity, JwtAuthFilter jwtAuthFilter) throws Exception{
         httpSecurity
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/posts","/auth/**").permitAll()
+                        .requestMatchers("/posts","/auth/**","/home.html").permitAll()
 //                        .requestMatchers("/posts/**").hasAnyRole("ADMIN")
                         .anyRequest().authenticated())
                 .csrf(csrfConfig->csrfConfig
                         .disable())
                 .sessionManagement(sessionConfig->sessionConfig
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2Config -> oauth2Config
+                        .failureUrl("/login?error=true")
+                        .successHandler(oAuth2SuccessHandler)
+                );
 //                .formLogin(Customizer.withDefaults());  //add default login form and its features
 
         return httpSecurity.build();

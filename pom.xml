@@ -50,6 +50,13 @@
 			<scope>compile</scope>
 		</dependency>
 
+<!--		oauth2 client dependency-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-oauth2-client</artifactId>
+		</dependency>
+<!--		-->
+
 <!--		JWT tokens -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
