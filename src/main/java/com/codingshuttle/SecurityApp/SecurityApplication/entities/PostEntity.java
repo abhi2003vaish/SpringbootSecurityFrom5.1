@@ -21,4 +21,8 @@ public class PostEntity {
     private String title;
 
     private String description;
+
+//    one user can have multiple posts
+    @ManyToOne
+    private User author;
 }

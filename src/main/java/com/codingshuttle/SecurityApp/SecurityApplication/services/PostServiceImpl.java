@@ -33,7 +33,11 @@ public class PostServiceImpl implements PostService{
 
     @Override
     public PostDTO createNewPost(PostDTO postDTO) {
+//        taking the information/details of current user who is logged in and creating a post
+        User user=(User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         PostEntity postEntity= modelMapper.map(postDTO,PostEntity.class);
+//        now setting the user details in postEntity of author field so that we can know which user created the post
+        postEntity.setAuthor(user);
         return modelMapper.map(postRepository.save(postEntity),PostDTO.class);
     }
 
